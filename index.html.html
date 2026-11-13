@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>تقرير الإجازات اليومي</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#182230;--muted:#667085;--line:#e5e9ef;--navy:#172b4d;--teal:#1b8a83;--soft:#e9f5f3;--danger:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink);padding:18px}
+.wrap{max-width:760px;margin:auto}.hero{background:linear-gradient(135deg,#14243d,#244b62);color:white;border-radius:22px;padding:25px 22px;margin-bottom:16px;box-shadow:0 12px 28px #14243d20}
+.kicker{font-size:12px;letter-spacing:.5px;color:#b9d8dc}.hero h1{font-size:25px;margin:8px 0}.hero p{margin:0;color:#d5e2ea;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 4px 16px #18223008}
+.section-title{font-size:17px;margin:0 0 14px;color:var(--navy)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}label{font-size:13px;color:#475467;font-weight:650}
+input,select,textarea{width:100%;border:1px solid #d5dce5;border-radius:11px;padding:12px;font:inherit;font-size:15px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px #1b8a8318}textarea{min-height:76px;resize:vertical}
+button{border:0;border-radius:12px;padding:12px 15px;font:inherit;font-weight:700;cursor:pointer}
+.primary{background:var(--teal);color:#fff}.secondary{background:var(--soft);color:#176b66}.dark{background:var(--navy);color:#fff}.ghost{background:#f1f3f6;color:#344054}.remove{background:#fff0ef;color:var(--danger);padding:8px 10px;font-size:12px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.stats{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#f7fafb;border-radius:13px;padding:13px 15px;margin-bottom:12px}
+.num{font-size:26px;font-weight:800;color:var(--teal)}.muted{color:var(--muted);font-size:13px}
+.employee{border:1px solid var(--line);border-radius:14px;padding:13px;margin:10px 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.employee strong{display:block;margin-bottom:5px}.employee small{display:block;color:var(--muted);line-height:1.7}
+.empty{text-align:center;color:var(--muted);padding:22px 8px;border:1px dashed #cbd5e1;border-radius:13px}
+.report{white-space:pre-wrap;line-height:1.9;background:#fbfcfd;border:1px solid var(--line);border-radius:13px;padding:15px;font-size:14px}
+.foot{text-align:center;color:#98a2b3;font-size:12px;padding:14px}
+@media(max-width:520px){body{padding:12px}.grid{grid-template-columns:1fr}.hero{padding:21px}.hero h1{font-size:22px}.card{padding:15px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">نموذج إداري • للاستخدام اليومي</div>
+    <h1>تقرير الإجازات اليومي</h1>
+    <p>سجّل إجازات الموظفين، واطلع على تقرير مرتب جاهز للإرسال للمدير.</p>
+  </header>
+
+  <section class="card">
+    <h2 class="section-title">بيانات التقرير</h2>
+    <div class="grid">
+      <div class="field"><label for="reportDate">تاريخ التقرير</label><input id="reportDate" type="date"></div>
+      <div class="field"><label for="department">القسم / الإدارة</label><input id="department" placeholder="مثال: المطعم أو الكافيه"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">إضافة موظف في إجازة</h2>
+    <div class="grid">
+      <div class="field"><label for="employeeName">اسم الموظف *</label><input id="employeeName" placeholder="اكتب اسم الموظف"></div>
+      <div class="field"><label for="job">الوظيفة أو القسم</label><input id="job" placeholder="مثال: ويتر / كاشير"></div>
+      <div class="field"><label for="leaveType">نوع الإجازة</label>
+        <select id="leaveType"><option>سنوية</option><option>عارضة</option><option>مرضية</option><option>بدون مرتب</option><option>راحة أسبوعية</option><option>أخرى</option></select>
+      </div>
+      <div class="field"><label for="notes">ملاحظات</label><input id="notes" placeholder="اختياري"></div>
+    </div>
+    <div class="actions"><button class="primary" id="addBtn">＋ إضافة الموظف</button></div>
+  </section>
+
+  <section class="card">
+    <div class="stats"><div><strong>إجمالي الموظفين في إجازة</strong><div class="muted">حسب البيانات المسجلة</div></div><div class="num" id="count">0</div></div>
+    <h2 class="section-title">قائمة الإجازات</h2>
+    <div id="employees" class="empty">لم تتم إضافة أي موظف حتى الآن.</div>
+    <div class="actions"><button class="secondary" id="buildBtn">تجهيز التقرير</button><button class="ghost" id="clearBtn">مسح القائمة</button></div>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">التقرير الجاهز للإرسال</h2>
+    <div id="report" class="report">اضغط على «تجهيز التقرير» لعرض التقرير هنا.</div>
+    <div class="actions"><button class="dark" id="copyBtn">نسخ التقرير</button><button class="secondary" id="shareBtn">مشاركة التقرير</button></div>
+    <div class="muted" style="margin-top:10px">بيانات الموظفين محفوظة على هذا الجهاز والمتصفح فقط، ولا يتم رفعها إلى خادم.</div>
+  </section>
+  <div class="foot">تقرير الإجازات اليومي</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const STORAGE="dailyLeaveReport_v1";
+let employees=[];
+try{employees=JSON.parse(localStorage.getItem(STORAGE)||"[]");if(!Array.isArray(employees))employees=[]}catch(e){employees=[]}
+const today=new Date();const localDate=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+$("reportDate").value=localDate;
+function save(){localStorage.setItem(STORAGE,JSON.stringify(employees));render()}
+function render(){
+ $("count").textContent=employees.length;
+ const host=$("employees");
+ if(!employees.length){host.className="empty";host.textContent="لم تتم إضافة أي موظف حتى الآن.";return}
+ host.className="";
+ host.innerHTML="";
+ employees.forEach((e,i)=>{
+  const item=document.createElement("div");item.className="employee";
+  const info=document.createElement("div");
+  const name=document.createElement("strong");name.textContent=(i+1)+". "+e.name;info.appendChild(name);
+  const details=document.createElement("small");details.textContent=[e.job,e.type,e.notes].filter(Boolean).join(" • ");info.appendChild(details);
+  const del=document.createElement("button");del.className="remove";del.textContent="حذف";del.onclick=()=>{employees.splice(i,1);save()};
+  item.append(info,del);host.appendChild(item);
+ });
+}
+$("addBtn").onclick=()=>{
+ const name=$("employeeName").value.trim();
+ if(!name){alert("اكتب اسم الموظف أولاً.");$("employeeName").focus();return}
+ employees.push({name,job:$("job").value.trim(),type:$("leaveType").value,notes:$("notes").value.trim()});
+ ["employeeName","job","notes"].forEach(id=>$(id).value="");
+ save();$("employeeName").focus();
+};
+function makeReport(){
+ const d=$("reportDate").value;
+ const date=d?new Date(d+"T12:00:00").toLocaleDateString("ar-EG",{weekday:"long",year:"numeric",month:"long",day:"numeric"}):"غير محدد";
+ const dept=$("department").value.trim();
+ let lines=["📋 تقرير الإجازات اليومي","التاريخ: "+date];
+ if(dept)lines.push("القسم: "+dept);
+ lines.push("━━━━━━━━━━━━━━━━━━");
+ if(!employees.length)lines.push("لا توجد إجازات مسجلة اليوم.");
+ else employees.forEach((e,i)=>{
+  lines.push((i+1)+") "+e.name);
+  if(e.job)lines.push("   الوظيفة/القسم: "+e.job);
+  lines.push("   نوع الإجازة: "+e.type);
+  if(e.notes)lines.push("   ملاحظات: "+e.notes);
+ });
+ lines.push("━━━━━━━━━━━━━━━━━━","إجمالي الموظفين في إجازة: "+employees.length,"مع خالص التحية.");
+ return lines.join("\n");
+}
+$("buildBtn").onclick=()=>{$("report").textContent=makeReport()};
+$("copyBtn").onclick=async()=>{
+ const text=$("report").textContent;
+ try{await navigator.clipboard.writeText(text);alert("تم نسخ التقرير.");}
+ catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("تم نسخ التقرير.");}
+};
+$("shareBtn").onclick=async()=>{
+ const text=$("report").textContent;
+ if(navigator.share){try{await navigator.share({title:"تقرير الإجازات اليومي",text})}catch(e){}}
+ else{try{await navigator.clipboard.writeText(text);alert("تم نسخ التقرير. يمكنك لصقه في واتساب أو البريد.");}catch(e){alert("انسخ التقرير يدويًا من المربع.")}}
+};
+$("clearBtn").onclick=()=>{if(confirm("هل تريد مسح كل الموظفين المسجلين؟")){employees=[];save();$("report").textContent="اضغط على «تجهيز التقرير» لعرض التقرير هنا."}};
+render();
+</script>
+</body>
+</html>
